@@ -1,5 +1,4 @@
-//import 'package:driver_app/authentication/carinfo_screen.dart';
-import 'package:driver_app/authentication/carinfo_screen.dart';
+import 'package:driver_app/authentication/car_info_screen.dart';
 import 'package:driver_app/authentication/login_screen.dart';
 import 'package:driver_app/global/global.dart';
 import 'package:driver_app/widgets/progress_dialog.dart';
@@ -10,7 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
+  _SignUpScreenState createState() => _SignUpScreenState();
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
@@ -18,21 +17,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController emailTextEditingController = TextEditingController();
   TextEditingController phoneTextEditingController = TextEditingController();
   TextEditingController passwordTextEditingController = TextEditingController();
-  TextEditingController cnicTextEditingController = TextEditingController();
 
   validateForm() {
     if (nameTextEditingController.text.length < 3) {
-      Fluttertoast.showToast(msg: "name must be atleast 3 characters");
+      Fluttertoast.showToast(msg: "name must be atleast 3 Characters.");
     } else if (!emailTextEditingController.text.contains("@")) {
-      Fluttertoast.showToast(msg: "Invalid Email");
+      Fluttertoast.showToast(msg: "Email address is not Valid.");
     } else if (phoneTextEditingController.text.isEmpty) {
-      Fluttertoast.showToast(msg: "Invalid Phone Number");
-    } else if (passwordTextEditingController.text.length < 8) {
-      Fluttertoast.showToast(msg: "Password must be atleast 8 characters");
+      Fluttertoast.showToast(msg: "Phone Number is required.");
+    } else if (passwordTextEditingController.text.length < 6) {
+      Fluttertoast.showToast(msg: "Password must be atleast 6 Characters.");
     } else {
       saveDriverInfoNow();
     }
-    ;
   }
 
   saveDriverInfoNow() async {
@@ -41,15 +38,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
         barrierDismissible: false,
         builder: (BuildContext c) {
           return ProgressDialog(
-            message: "Processing, Please wait",
+            message: "Processing, Please wait...",
           );
         });
 
-    //create new user
-    final User? firebaseUser = (await firebaseAuth
+    final User? firebaseUser = (await fAuth
             .createUserWithEmailAndPassword(
       email: emailTextEditingController.text.trim(),
-      //trim() removes the extra spaces in emails of password.
       password: passwordTextEditingController.text.trim(),
     )
             .catchError((msg) {
@@ -58,33 +53,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }))
         .user;
 
-    //saving driver info
     if (firebaseUser != null) {
       Map driverMap = {
         "id": firebaseUser.uid,
         "name": nameTextEditingController.text.trim(),
         "email": emailTextEditingController.text.trim(),
         "phone": phoneTextEditingController.text.trim(),
-        "cnic": cnicTextEditingController.text.trim()
       };
+
       DatabaseReference driversRef =
           FirebaseDatabase.instance.ref().child("drivers");
       driversRef.child(firebaseUser.uid).set(driverMap);
 
       currentFirebaseUser = firebaseUser;
-      Fluttertoast.showToast(msg: "Account has been created");
+      Fluttertoast.showToast(msg: "Account has been Created.");
       Navigator.push(
           context, MaterialPageRoute(builder: (c) => CarInfoScreen()));
     } else {
       Navigator.pop(context);
-      Fluttertoast.showToast(msg: "Account has not been created");
+      Fluttertoast.showToast(msg: "Account has not been Created.");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xff9ef5cf),
+      backgroundColor: Colors.black,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -95,26 +89,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Image.asset('images/logo_fg.png'),
+                child: Image.asset("images/logo1.png"),
               ),
               const SizedBox(
                 height: 10,
               ),
               const Text(
-                'Register as Driver',
+                "Register as a Driver",
                 style: TextStyle(
-                    fontSize: 26.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                  fontSize: 26,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               TextField(
                 controller: nameTextEditingController,
-                style: const TextStyle(
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(color: Colors.grey),
                 decoration: const InputDecoration(
-                  labelText: 'Name',
-                  hintText: 'Name',
+                  labelText: "Name",
+                  hintText: "Name",
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey),
                   ),
@@ -123,73 +116,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   hintStyle: TextStyle(
                     color: Colors.grey,
-                    fontSize: 10.0,
+                    fontSize: 10,
                   ),
                   labelStyle: TextStyle(
                     color: Colors.grey,
-                    fontSize: 14.0,
-                  ),
-                ),
-              ),
-              TextField(
-                controller: phoneTextEditingController,
-                keyboardType: TextInputType.phone,
-                style: const TextStyle(
-                  color: Colors.grey,
-                ),
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number',
-                  hintText: '03*********',
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  hintStyle: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 10.0,
-                  ),
-                  labelStyle: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14.0,
-                  ),
-                ),
-              ),
-              TextField(
-                controller: cnicTextEditingController,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(
-                  color: Colors.grey,
-                ),
-                decoration: const InputDecoration(
-                  labelText: 'CNIC',
-                  hintText: '13 Digits',
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  hintStyle: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 10.0,
-                  ),
-                  labelStyle: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14.0,
+                    fontSize: 14,
                   ),
                 ),
               ),
               TextField(
                 controller: emailTextEditingController,
                 keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(color: Colors.grey),
                 decoration: const InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'xyz@gmail.com',
+                  labelText: "Email",
+                  hintText: "Email",
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey),
                   ),
@@ -198,11 +139,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   hintStyle: TextStyle(
                     color: Colors.grey,
-                    fontSize: 10.0,
+                    fontSize: 10,
                   ),
                   labelStyle: TextStyle(
                     color: Colors.grey,
-                    fontSize: 14.0,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              TextField(
+                controller: phoneTextEditingController,
+                keyboardType: TextInputType.phone,
+                style: const TextStyle(color: Colors.grey),
+                decoration: const InputDecoration(
+                  labelText: "Phone",
+                  hintText: "Phone",
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  hintStyle: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 10,
+                  ),
+                  labelStyle: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
                   ),
                 ),
               ),
@@ -210,12 +174,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 controller: passwordTextEditingController,
                 keyboardType: TextInputType.text,
                 obscureText: true,
-                style: const TextStyle(
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(color: Colors.grey),
                 decoration: const InputDecoration(
-                  labelText: 'Password',
-                  hintText: '**********',
+                  labelText: "Password",
+                  hintText: "Password",
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey),
                   ),
@@ -224,11 +186,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   hintStyle: TextStyle(
                     color: Colors.grey,
-                    fontSize: 10.0,
+                    fontSize: 10,
                   ),
                   labelStyle: TextStyle(
                     color: Colors.grey,
-                    fontSize: 14.0,
+                    fontSize: 14,
                   ),
                 ),
               ),
@@ -238,13 +200,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ElevatedButton(
                 onPressed: () {
                   validateForm();
-                  //Navigator.push(context, MaterialPageRoute(builder: (c)=>CarInfoScreen()));
                 },
                 style: ElevatedButton.styleFrom(
                   primary: Colors.lightGreenAccent,
                 ),
                 child: const Text(
-                  'Create Account',
+                  "Create Account",
                   style: TextStyle(
                     color: Colors.black54,
                     fontSize: 18,
@@ -252,18 +213,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               TextButton(
-                  child: const Text(
-                    "Already have an Account? Login",
-                    style: TextStyle(
-                      color: Colors.grey,
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (c) => loginScreen()),
-                    );
-                  }),
+                child: const Text(
+                  "Already have an Account? Login Here",
+                  style: TextStyle(color: Colors.grey),
+                ),
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (c) => LoginScreen()));
+                },
+              ),
             ],
           ),
         ),

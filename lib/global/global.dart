@@ -1,14 +1,15 @@
 import 'dart:async';
 
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:driver_app/models/driver_data.dart';
+import 'package:driver_app/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 
-import '../models/user_model.dart';
-
-final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+final FirebaseAuth fAuth = FirebaseAuth.instance;
 User? currentFirebaseUser;
 UserModel? userModelCurrentInfo;
-
-late StreamSubscription<Position> streamSubscriptionPosition;
+StreamSubscription<Position>? streamSubscriptionPosition;
 AssetsAudioPlayer audioPlayer = AssetsAudioPlayer();
+Position? driverCurrentPosition;
+DriverData onlineDriverData = DriverData();

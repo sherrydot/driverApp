@@ -1,45 +1,35 @@
 import 'dart:async';
 
 import 'package:driver_app/authentication/login_screen.dart';
-import 'package:driver_app/authentication/signup_screen.dart';
 import 'package:driver_app/global/global.dart';
 import 'package:driver_app/mainScreens/main_screen.dart';
-//import 'package:driver_app/mainScreens/main_screen.dart';
 import 'package:flutter/material.dart';
 
 class MySplashScreen extends StatefulWidget {
   const MySplashScreen({Key? key}) : super(key: key);
 
   @override
-  State<MySplashScreen> createState() => _MySplashScreenState();
+  _MySplashScreenState createState() => _MySplashScreenState();
 }
 
 class _MySplashScreenState extends State<MySplashScreen> {
-  startTimer() // timer for splash screen
-  {
+  startTimer() {
     Timer(const Duration(seconds: 3), () async {
-
-      if (await firebaseAuth.currentUser != null){
-        currentFirebaseUser = firebaseAuth.currentUser;
+      if (await fAuth.currentUser != null) {
+        currentFirebaseUser = fAuth.currentUser;
         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (c) => MainScreen()),
-        );
+            context, MaterialPageRoute(builder: (c) => MainScreen()));
+      } else {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (c) => LoginScreen()));
       }
-      else{
-      //send user to home screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (c) => loginScreen()),
-      );
-    };
     });
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+
     startTimer();
   }
 
@@ -47,16 +37,23 @@ class _MySplashScreenState extends State<MySplashScreen> {
   Widget build(BuildContext context) {
     return Material(
       child: Container(
-        color: Color(0xffacf3df),
+        color: Colors.black,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset("images/logo_fg.png"),
+              Image.asset("images/logo1.png"),
               const SizedBox(
                 height: 10,
               ),
-              ],
+              const Text(
+                "Uber & inDriver Clone App",
+                style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
         ),
       ),

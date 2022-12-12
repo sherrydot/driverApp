@@ -1,22 +1,23 @@
 import 'dart:async';
 
+import 'package:driver_app/assistants/assistant_methods.dart';
 import 'package:driver_app/global/global.dart';
-import 'package:driver_app/push_notification/push_notification_system.dart';
-import 'package:driver_app/splashScreen/splash_screen.dart';
+import 'package:driver_app/push_notifications/push_notification_system.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../assistants/assistant_methods.dart';
+import '../assistants/black_theme_google_map.dart';
 
 class HomeTabPage extends StatefulWidget {
   const HomeTabPage({Key? key}) : super(key: key);
 
   @override
-  State<HomeTabPage> createState() => _HomeTabPageState();
+  _HomeTabPageState createState() => _HomeTabPageState();
 }
 
 class _HomeTabPageState extends State<HomeTabPage> {
@@ -28,180 +29,12 @@ class _HomeTabPageState extends State<HomeTabPage> {
     zoom: 14.4746,
   );
 
-  Position? driverCurrentPosition;
   var geoLocator = Geolocator();
   LocationPermission? _locationPermission;
 
-  // Offline Driver Status
   String statusText = "Now Offline";
   Color buttonColor = Colors.grey;
   bool isDriverActive = false;
-
-  blackThemeGoogleMap() {
-    newGoogleMapController!.setMapStyle('''
-                    [
-                      {
-                        "elementType": "geometry",
-                        "stylers": [
-                          {
-                            "color": "#242f3e"
-                          }
-                        ]
-                      },
-                      {
-                        "elementType": "labels.text.fill",
-                        "stylers": [
-                          {
-                            "color": "#746855"
-                          }
-                        ]
-                      },
-                      {
-                        "elementType": "labels.text.stroke",
-                        "stylers": [
-                          {
-                            "color": "#242f3e"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "administrative.locality",
-                        "elementType": "labels.text.fill",
-                        "stylers": [
-                          {
-                            "color": "#d59563"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "poi",
-                        "elementType": "labels.text.fill",
-                        "stylers": [
-                          {
-                            "color": "#d59563"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "poi.park",
-                        "elementType": "geometry",
-                        "stylers": [
-                          {
-                            "color": "#263c3f"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "poi.park",
-                        "elementType": "labels.text.fill",
-                        "stylers": [
-                          {
-                            "color": "#6b9a76"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "road",
-                        "elementType": "geometry",
-                        "stylers": [
-                          {
-                            "color": "#38414e"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "road",
-                        "elementType": "geometry.stroke",
-                        "stylers": [
-                          {
-                            "color": "#212a37"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "road",
-                        "elementType": "labels.text.fill",
-                        "stylers": [
-                          {
-                            "color": "#9ca5b3"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "road.highway",
-                        "elementType": "geometry",
-                        "stylers": [
-                          {
-                            "color": "#746855"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "road.highway",
-                        "elementType": "geometry.stroke",
-                        "stylers": [
-                          {
-                            "color": "#1f2835"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "road.highway",
-                        "elementType": "labels.text.fill",
-                        "stylers": [
-                          {
-                            "color": "#f3d19c"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "transit",
-                        "elementType": "geometry",
-                        "stylers": [
-                          {
-                            "color": "#2f3948"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "transit.station",
-                        "elementType": "labels.text.fill",
-                        "stylers": [
-                          {
-                            "color": "#d59563"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "water",
-                        "elementType": "geometry",
-                        "stylers": [
-                          {
-                            "color": "#17263c"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "water",
-                        "elementType": "labels.text.fill",
-                        "stylers": [
-                          {
-                            "color": "#515c6d"
-                          }
-                        ]
-                      },
-                      {
-                        "featureType": "water",
-                        "elementType": "labels.text.stroke",
-                        "stylers": [
-                          {
-                            "color": "#17263c"
-                          }
-                        ]
-                      }
-                    ]
-                ''');
-  }
 
   checkIfLocationPermissionAllowed() async {
     _locationPermission = await Geolocator.requestPermission();
@@ -214,21 +47,53 @@ class _HomeTabPageState extends State<HomeTabPage> {
   locateDriverPosition() async {
     Position cPosition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    var driverCurrentPosition = cPosition;
-    LatLng latLngPosition =
-        LatLng(driverCurrentPosition.latitude, driverCurrentPosition.longitude);
+    driverCurrentPosition = cPosition;
+
+    LatLng latLngPosition = LatLng(
+        driverCurrentPosition!.latitude, driverCurrentPosition!.longitude);
+
     CameraPosition cameraPosition =
         CameraPosition(target: latLngPosition, zoom: 14);
+
     newGoogleMapController!
         .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+
     String humanReadableAddress =
         await AssistantMethods.searchAddressForGeographicCoOrdinates(
-            driverCurrentPosition, context);
+            driverCurrentPosition!, context);
     print("this is your address = " + humanReadableAddress);
   }
 
   readCurrentDriverInformation() async {
-    currentFirebaseUser = firebaseAuth.currentUser;
+    currentFirebaseUser = fAuth.currentUser;
+
+    await FirebaseDatabase.instance
+        .ref()
+        .child("drivers")
+        .child(currentFirebaseUser!.uid)
+        .once()
+        .then((DatabaseEvent snap) {
+      if (snap.snapshot.value != null) {
+        onlineDriverData.id = (snap.snapshot.value as Map)["id"];
+        onlineDriverData.name = (snap.snapshot.value as Map)["name"];
+        onlineDriverData.phone = (snap.snapshot.value as Map)["phone"];
+        onlineDriverData.email = (snap.snapshot.value as Map)["email"];
+        onlineDriverData.car_color =
+            (snap.snapshot.value as Map)["car_details"]["car_color"];
+        onlineDriverData.car_model =
+            (snap.snapshot.value as Map)["car_details"]["car_model"];
+        onlineDriverData.car_number =
+            (snap.snapshot.value as Map)["car_details"]["car_number"];
+
+        driverVehicleType = (snap.snapshot.value as Map)["car_details"]["type"];
+
+        print("Car Details :: ");
+        print(onlineDriverData.car_color);
+        print(onlineDriverData.car_model);
+        print(onlineDriverData.car_number);
+      }
+    });
+
     PushNotificationSystem pushNotificationSystem = PushNotificationSystem();
     pushNotificationSystem.initializeCloudMessaging(context);
     pushNotificationSystem.generateAndGetToken();
@@ -237,18 +102,14 @@ class _HomeTabPageState extends State<HomeTabPage> {
   @override
   void initState() {
     super.initState();
+
     checkIfLocationPermissionAllowed();
     readCurrentDriverInformation();
   }
-  // @override
-  // void initState() {
-  //   super.initState();
-  // }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Stack(
+    return Stack(
       children: [
         GoogleMap(
           mapType: MapType.normal,
@@ -258,23 +119,26 @@ class _HomeTabPageState extends State<HomeTabPage> {
             _controllerGoogleMap.complete(controller);
             newGoogleMapController = controller;
 
-            blackThemeGoogleMap();
+            //black theme google map
+            blackThemeGoogleMap(newGoogleMapController);
+
             locateDriverPosition();
           },
         ),
-        // ui for online/offline driver
+
+        //ui for online offline driver
         statusText != "Now Online"
             ? Container(
                 height: MediaQuery.of(context).size.height,
                 width: double.infinity,
-                color: Colors.black54,
+                color: Colors.black87,
               )
             : Container(),
 
-        //button for online/offline driver
+        //button for online offline driver
         Positioned(
           top: statusText != "Now Online"
-              ? MediaQuery.of(context).size.height * 0.50
+              ? MediaQuery.of(context).size.height * 0.46
               : 25,
           left: 0,
           right: 0,
@@ -282,13 +146,6 @@ class _HomeTabPageState extends State<HomeTabPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: buttonColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(26),
-                  ),
-                ),
                 onPressed: () {
                   if (isDriverActive != true) //offline
                   {
@@ -317,6 +174,13 @@ class _HomeTabPageState extends State<HomeTabPage> {
                     Fluttertoast.showToast(msg: "you are Offline Now");
                   }
                 },
+                style: ElevatedButton.styleFrom(
+                  primary: buttonColor,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(26),
+                  ),
+                ),
                 child: statusText != "Now Online"
                     ? Text(
                         statusText,
@@ -331,21 +195,22 @@ class _HomeTabPageState extends State<HomeTabPage> {
                         color: Colors.white,
                         size: 26,
                       ),
-              )
+              ),
             ],
           ),
         ),
       ],
-    ));
+    );
   }
 
   driverIsOnlineNow() async {
     Position pos = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
-
     driverCurrentPosition = pos;
+
     Geofire.initialize("activeDrivers");
+
     Geofire.setLocation(currentFirebaseUser!.uid,
         driverCurrentPosition!.latitude, driverCurrentPosition!.longitude);
 
@@ -355,7 +220,7 @@ class _HomeTabPageState extends State<HomeTabPage> {
         .child(currentFirebaseUser!.uid)
         .child("newRideStatus");
 
-    ref.set("idle"); //looking for ride request
+    ref.set("idle"); //searching for ride request
     ref.onValue.listen((event) {});
   }
 
@@ -363,6 +228,7 @@ class _HomeTabPageState extends State<HomeTabPage> {
     streamSubscriptionPosition =
         Geolocator.getPositionStream().listen((Position position) {
       driverCurrentPosition = position;
+
       if (isDriverActive == true) {
         Geofire.setLocation(currentFirebaseUser!.uid,
             driverCurrentPosition!.latitude, driverCurrentPosition!.longitude);
@@ -391,9 +257,7 @@ class _HomeTabPageState extends State<HomeTabPage> {
 
     Future.delayed(const Duration(milliseconds: 2000), () {
       //SystemChannels.platform.invokeMethod("SystemNavigator.pop");
-      // SystemNavigator.pop();
-      Navigator.push(
-          context, MaterialPageRoute(builder: (c) => const MySplashScreen()));
+      SystemNavigator.pop();
     });
   }
 }
