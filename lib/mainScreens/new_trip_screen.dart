@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:driver_app/global/global.dart';
 import 'package:driver_app/models/user_ride_request_information.dart';
+import 'package:driver_app/widgets/fare_amount_collection_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -575,9 +576,52 @@ class _NewTripScreenState extends State<NewTripScreen> {
         .child("status")
         .set("ended");
 
-    streamSubscriptionDriverLivePosition.cancel();
+    streamSubscriptionDriverLivePosition!.cancel();
 
     Navigator.pop(context);
+
+    //display fare amount in dialog box
+    showDialog(
+      context: context,
+      builder: (BuildContext c) => FareAmountCollectionDialog(
+        totalFareAmount: totalFareAmount,
+      ),
+    );
+
+    //save fare amount to driver total earnings
+    saveFareAmountToDriverEarnings(totalFareAmount);
+  }
+
+  saveFareAmountToDriverEarnings(double totalFareAmount) {
+    FirebaseDatabase.instance
+        .ref()
+        .child("drivers")
+        .child(currentFirebaseUser!.uid)
+        .child("earnings")
+        .once()
+        .then((snap) {
+      if (snap.snapshot.value != null) //earnings sub Child exists
+      {
+        //12
+        double oldEarnings = double.parse(snap.snapshot.value.toString());
+        double driverTotalEarnings = totalFareAmount + oldEarnings;
+
+        FirebaseDatabase.instance
+            .ref()
+            .child("drivers")
+            .child(currentFirebaseUser!.uid)
+            .child("earnings")
+            .set(driverTotalEarnings.toString());
+      } else //earnings sub Child do not exists
+      {
+        FirebaseDatabase.instance
+            .ref()
+            .child("drivers")
+            .child(currentFirebaseUser!.uid)
+            .child("earnings")
+            .set(totalFareAmount.toString());
+      }
+    });
   }
 
   saveAssignedDriverDetailsToUserRideRequest() {
