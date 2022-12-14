@@ -325,7 +325,7 @@ packages:
     source: hosted
     version: "4.0.2"
   intl:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: intl
       url: "https://pub.dartlang.org"
@@ -469,6 +469,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
+  smooth_star_rating_nsafe:
+    dependency: "direct main"
+    description:
+      name: smooth_star_rating_nsafe
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0+1"
   source_span:
     dependency: transitive
     description:
