@@ -11,6 +11,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../models/trips_history_model.dart';
+import '../models/user_model.dart';
 
 class AssistantMethods {
   static Future<String> searchAddressForGeographicCoOrdinates(
@@ -34,6 +35,21 @@ class AssistantMethods {
     }
 
     return humanReadableAddress;
+  }
+
+  static void readCurrentOnlineUserInfo() async {
+    currentFirebaseUser = fAuth.currentUser;
+
+    DatabaseReference userRef = FirebaseDatabase.instance
+        .ref()
+        .child("users")
+        .child(currentFirebaseUser!.uid);
+
+    userRef.once().then((snap) {
+      if (snap.snapshot.value != null) {
+        userModelCurrentInfo = UserModel.fromSnapshot(snap.snapshot);
+      }
+    });
   }
 
   static Future<DirectionDetailsInfo?>
